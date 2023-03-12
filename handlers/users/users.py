@@ -4,10 +4,15 @@ from aiogram.types import *
 from keyboards.inline.users_btn import languages_btn
 from loader import dp
 from utils.misc.text_translator import text_trans
+from database.connections import add_user
 
 
 async def bot_start(message: Message):
-    await message.answer(f"Salom")
+    user_id = message.from_user.id
+    username = message.from_user.username
+    await add_user(user_id, username)
+
+    await message.answer(f"Assalomu aleykum")
 
 
 async def get_user_text_handler(message: Message):
@@ -17,11 +22,13 @@ async def get_user_text_handler(message: Message):
 
 
 async def select_lang_callback(call: CallbackQuery):
+    await call.answer()
     lang = call.data.split(":")[-1]
     context = call.message.text
     result = await text_trans(context, lang)
-    btn = await languages_btn()
-    await call.message.edit_text(result, reply_markup=btn)
+    if context != result:
+        btn = await languages_btn()
+        await call.message.edit_text(result, reply_markup=btn)
 
 
 def register_users_py(dp: Dispatcher):
